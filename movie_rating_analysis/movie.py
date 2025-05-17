@@ -25,7 +25,10 @@ fig.show()
 As 10 is the highest rating a viewer can give, let’s take a look at the top 10 movies that got 10 ratings by viewers:
 
 '''
-data2 = data.query("Ratings == 10")
-print(data2["Title"].value_counts().head(10))
+#data2 = data.query("Ratings == 10")
+#plot_data = data2["Title","Ratings"]
+print(data[data['Ratings'] == 10].drop_duplicates(subset=['Title'])[['Title','Ratings']])
+
+#print(data2["Title"].value_counts().head(10))
 
 # which movie had highest rating? do analysis
