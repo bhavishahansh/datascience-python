@@ -1,0 +1,43 @@
+import pandas as pd
+import plotly.express as ps
+import plotly.io as pio
+import plotly.graph_objects as go
+from datetime import datetime
+
+pio.templates.default = "plotly_white"
+
+data = pd.read_csv("rfm_data.csv")
+
+#print(data.head())
+
+data['PurchaseDate'] = pd.to_datetime(data['PurchaseDate'])
+
+# Calculate Recency
+data['Recency'] = (datetime.now() - data['PurchaseDate']).dt.days
+
+# Calculate Frequency
+frequency_data = data.groupby('CustomerID')['OrderID'].count().reset_index()
+frequency_data.rename(columns={'OrderID': 'Frequency'}, inplace=True)
+data = data.merge(frequency_data, on='CustomerID', how='left')
+
+# Calculate Monetary Value
+monetary_data = data.groupby('CustomerID')['TransactionAmount'].sum().reset_index()
+monetary_data.rename(columns={'TransactionAmount': 'MonetaryValue'}, inplace=True)
+data = data.merge(monetary_data, on='CustomerID', how='left')
+
+# Define scoring criteria for each RFM value
+recency_scores = [5, 4, 3, 2, 1]  # Higher score for lower recency (more recent)
+frequency_scores = [1, 2, 3, 4, 5]  # Higher score for higher frequency
+monetary_scores = [1, 2, 3, 4, 5]  # Higher score for higher monetary value
+
+# Calculate RFM scores
+data['RecencyScore'] = pd.cut(data['Recency'], bins=5, labels=recency_scores)
+data['FrequencyScore'] = pd.cut(data['Frequency'], bins=5, labels=frequency_scores)
+data['MonetaryScore'] = pd.cut(data['MonetaryValue'], bins=5, labels=monetary_scores)
+
+data['RecencyScore'] = data['RecencyScore'].astype(int)
+data['FrequencyScore'] = data['FrequencyScore'].astype(int)
+data['MonetaryScore'] = data['MonetaryScore'].astype(int)
+
+
+print(data['RecencyScore'])
