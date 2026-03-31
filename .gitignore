@@ -1,0 +1,2 @@
+# Ignore the large data folders causing the lag
+ecommerce_frontend/node_modules
